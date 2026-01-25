@@ -1,0 +1,39 @@
+# RPC Provider Configuration
+
+# ZooKeeper配置
+zookeeper:
+  host: 172.31.151.142
+  port: 2181
+  root-path: RPC
+  retry-path: CanRetry
+  session-timeout: 40000
+  connection-timeout: 15000
+
+# 服务端配置
+server:
+  host: 127.0.0.1
+  port: 9999
+
+# 序列化配置
+serializer:
+  # 序列化类型: json, object
+  type: json
+
+# 容错配置
+fault-tolerance:
+  # 限流配置
+  rate-limit:
+    enabled: true
+    # 令牌生成速率：每隔多少毫秒生成一个令牌
+    rate: 200
+    # 令牌桶容量
+    capacity: 100
+
+# 服务注册配置
+service:
+  # 默认是否支持重试
+  can-retry: false
+
+# 日志配置
+logging:
+  level: INFO
