@@ -1,9 +1,11 @@
 package com.tgu.transport.server;
 
+import com.tgu.enums.RequestType;
 import com.tgu.pojo.RpcRequest;
 import com.tgu.pojo.RpcResponse;
 import com.tgu.provider.ServiceProvider;
 import com.tgu.fault.ratelimit.RateLimit;
+import com.tgu.trace.ServerTraceInterceptor;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.AllArgsConstructor;
@@ -20,12 +22,31 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcRequest rpcRequest) throws Exception {
-        log.info("开始处理客户端请求: {}", rpcRequest);
-        RpcResponse response = getResponse(rpcRequest);
-        // TimeUnit.SECONDS.sleep(2);
-        ctx.writeAndFlush(response);
-        log.info("请求处理完成，返回响应: {}", response);
-        ctx.close();
+        if (rpcRequest == null) {
+            log.error("接收到非法请求，RpcRequest 为空");
+            return;
+        }
+        if (rpcRequest.getType() == RequestType.HEARTBEAT) {
+            log.info("接收到来自客户端的心跳包: {}", ctx.channel().id());
+            // 返回心跳响应
+            RpcResponse heartbeatResponse = RpcResponse.builder()
+                    .requestId(rpcRequest.getRequestId())
+                    .code(200)
+                    .message("heartbeat ok")
+                    .build();
+            ctx.writeAndFlush(heartbeatResponse);
+            return;
+        }
+        if (rpcRequest.getType() == RequestType.NORMAL) {
+            ServerTraceInterceptor.beforeHandle();
+            log.info("开始处理客户端请求: requestId={}", rpcRequest.getRequestId());
+            RpcResponse response = getResponse(rpcRequest);
+            // 设置 requestId 用于客户端匹配
+            response.setRequestId(rpcRequest.getRequestId());
+            ServerTraceInterceptor.afterHandle(rpcRequest.getMethodName());
+            ctx.writeAndFlush(response);
+            log.info("请求处理完成: requestId={}", rpcRequest.getRequestId());
+        }
     }
 
     private RpcResponse getResponse(RpcRequest request) {

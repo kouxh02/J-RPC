@@ -14,6 +14,18 @@ server:
   host: 127.0.0.1
   port: 9999
 
+zipkin:
+  url: http://localhost:9411/api/v2/spans
+
+# 心跳配置
+heartbeat:
+  server:
+    # 读空闲超时时间（秒）- 超过此时间没有收到客户端心跳，触发读空闲事件
+    reader-idle-time: 10
+    # 写空闲超时时间（秒）- 超过此时间没有写数据，触发写空闲事件
+    writer-idle-time: 20
+
+
 # 序列化配置
 serializer:
   # 序列化类型: json, object

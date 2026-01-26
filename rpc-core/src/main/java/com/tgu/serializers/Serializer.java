@@ -14,14 +14,12 @@ public interface Serializer {
     int getType();
 
     static Serializer getSerializerByCode(int code) {
-        switch (code) {
-            case 0:
-                return new ObjectSerializer();
-            case 1:
-                return new JsonSerializer();
-            default:
-                return null;
-        }
+        return switch (code) {
+            case 0 -> new ObjectSerializer();
+            case 1 -> new JsonSerializer();
+            case 2 -> new ProtostuffSerializer();
+            default -> null;
+        };
     }
 
 

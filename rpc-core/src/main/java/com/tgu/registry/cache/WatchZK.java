@@ -75,7 +75,7 @@ public class WatchZK {
     private String[] parsePath(ChildData childData) {
         String string = childData.getPath();
         String[] split = string.split("/");
-        log.info("parsed path >>> {}", Arrays.toString(split));
+//        log.info("parsed path >>> {}", Arrays.toString(split));
         return split;
     }
 

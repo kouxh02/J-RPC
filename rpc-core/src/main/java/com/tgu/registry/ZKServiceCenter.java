@@ -50,7 +50,7 @@ public class ZKServiceCenter implements ServiceCenter {
                 yield new RoundLoadBalance();
             }
         };
-        log.info("负载均衡策略: {}", strategy);
+//        log.info("负载均衡策略: {}", strategy);
     }
 
     // 根据服务名（接口名）返回地址
@@ -86,6 +86,11 @@ public class ZKServiceCenter implements ServiceCenter {
             throw new RuntimeException(e);
         }
         return canRetry;
+    }
+
+    @Override
+    public void close() {
+        client.close();
     }
 
 

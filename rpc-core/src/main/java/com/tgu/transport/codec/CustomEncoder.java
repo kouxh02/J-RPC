@@ -4,6 +4,7 @@ import com.tgu.enums.MessageType;
 import com.tgu.pojo.RpcRequest;
 import com.tgu.pojo.RpcResponse;
 import com.tgu.serializers.Serializer;
+import com.tgu.trace.TraceContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -20,6 +21,12 @@ public class CustomEncoder extends MessageToByteEncoder {
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
 //        log.info("ready to encode >>> {}", msg.getClass().getName());
+
+        String traceMsg = TraceContext.getTraceId() + ";" + TraceContext.getSpanId();
+        byte[] traceMsgBytes = traceMsg.getBytes();
+        out.writeInt(traceMsgBytes.length);
+        out.writeBytes(traceMsgBytes);
+//        log.info("CustomEncoder encode traceMsg:{}", traceMsg);
 
         if (msg instanceof RpcRequest) {
             out.writeShort(MessageType.REQUEST.getCode());

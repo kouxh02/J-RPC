@@ -7,4 +7,6 @@ import com.tgu.pojo.RpcResponse;
 public interface RpcClient {
 
     RpcResponse sendRequest(RpcRequest rpcRequest);
+
+    void close();
 }

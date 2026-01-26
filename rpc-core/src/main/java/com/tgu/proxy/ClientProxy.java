@@ -1,7 +1,10 @@
 package com.tgu.proxy;
 
+import com.tgu.enums.RequestType;
 import com.tgu.fault.circuitbreaker.CircuitBreaker;
 import com.tgu.fault.circuitbreaker.CircuitBreakerProvider;
+import com.tgu.trace.ClientTraceInterceptor;
+import com.tgu.trace.TraceContext;
 import com.tgu.transport.client.NettyZKRpcClient;
 import com.tgu.fault.retry.GuavaRetry;
 import com.tgu.transport.client.RpcClient;
@@ -49,6 +52,8 @@ public class ClientProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        log.info("ClientProxy invoke 方法被调用: {}.{}", method.getDeclaringClass().getName(), method.getName());
+        ClientTraceInterceptor.beforeInvoke();
         // 过滤 Object 类的方法，不作为 RPC 调用
         if (method.getDeclaringClass() == Object.class) {
             log.info("过滤：{}", method.getName());
@@ -59,6 +64,7 @@ public class ClientProxy implements InvocationHandler {
                 .interfaceName(method.getDeclaringClass().getName())
                 .methodName(method.getName())
                 .params(args)
+                .type(RequestType.NORMAL)
                 .paramsType(method.getParameterTypes())
                 .build();
 
@@ -82,8 +88,15 @@ public class ClientProxy implements InvocationHandler {
             circuitBreaker.recordFailure();
         }
 
+        ClientTraceInterceptor.afterInvoke(method.getName());
         return response.getData();
     }
+
+    public void close() {
+        rpcClient.close();
+        serviceCenter.close();
+    }
+
 
     public <T> T getProxy(Class<T> clazz) {
         Object o = Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, this);

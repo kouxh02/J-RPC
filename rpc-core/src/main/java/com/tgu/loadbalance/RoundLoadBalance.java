@@ -23,7 +23,7 @@ public class RoundLoadBalance implements LoadBalance{
         int current = position.getAndIncrement();
         int index = (current & Integer.MAX_VALUE) % addressList.size();
         String selectedServer = addressList.get(index);
-        log.info("负载均衡选择了服务器: {}, 索引: {}", selectedServer, index);
+//        log.info("负载均衡选择了服务器: {}, 索引: {}", selectedServer, index);
         return selectedServer;
     }
 }

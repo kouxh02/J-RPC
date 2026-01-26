@@ -2,6 +2,7 @@ package com.tgu.serializers;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.tgu.enums.RequestType;
 import com.tgu.pojo.RpcRequest;
 import com.tgu.pojo.RpcResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,12 @@ public class JsonSerializer implements Serializer {
                 // 将字节数组转化为 RpcRequest 对象
                 RpcRequest rpcRequest = JSON.parseObject(bytes, RpcRequest.class,
                         JSONReader.Feature.SupportClassForName);
-                // log.info("初步parse字节数组 >>> {}", rpcRequest);
+
+                if (rpcRequest.getType() == RequestType.HEARTBEAT) {
+                    obj = rpcRequest;
+                    break;
+                }
+                 log.info("初步parse字节数组 >>> {}", rpcRequest);
 
                 // 存储解析后的请求参数
                 Object[] objects = new Object[rpcRequest.getParamsType().length];

@@ -16,7 +16,7 @@ public class TestProvider {
         log.info("========================================");
         
         // 验证并打印配置
-        ConfigValidator.printAllConfig();
+//        ConfigValidator.printAllConfig();
         if (!ConfigValidator.validateConfig()) {
             log.error("配置验证失败，服务启动中止");
             System.exit(1);

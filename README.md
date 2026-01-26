@@ -1,10 +1,12 @@
-个基于 Netty 和 ZooKeeper 的高性能 Java RPC 框架，支持服务注册发现、负载均衡、容错机制（限流、重试、熔断）。
+一个基于 Netty 和 ZooKeeper 的高性能 Java RPC 框架，支持服务注册发现、负载均衡、容错机制（限流、重试、熔断）、链路追踪与心跳检测。
 
 ## 🚀 特性
 
 - **服务注册与发现**: 基于 ZooKeeper 实现，支持动态服务发现和本地缓存
 - **负载均衡**: 支持轮询（Round Robin）和随机（Random）策略
-- **序列化**: 支持 JSON（FastJSON2）和 Java 原生序列化
+- **序列化**: 支持 JSON（FastJSON2）、Java 原生序列化和 Protostuff
+- **链路追踪**: 内置 TraceContext/TraceId，支持 Zipkin 上报
+- **心跳检测**: 客户端/服务端空闲检测，自动发送与处理心跳包
 - **容错机制**:
   - **限流**: 令牌桶算法实现
   - **重试**: 基于 Guava Retry，支持可配置的重试策略
@@ -37,6 +39,8 @@ J-RPC
 - **Netty**: 4.1.51.Final - 高性能网络传输框架
 - **ZooKeeper**: 服务注册中心（通过 Curator 5.1.0 操作）
 - **FastJSON2**: 2.0.57 - JSON 序列化
+- **Protostuff**: 1.7.4 - 高性能二进制序列化
+- **Zipkin**: 3.4.0 - 链路追踪数据上报
 - **Guava Retry**: 重试机制
 - **Lombok**: 简化代码
 - **Log4j2**: 日志框架
@@ -98,7 +102,19 @@ zookeeper:
   host: 172.31.151.142
   port: 2181
   root-path: RPC
+  retry-path: CanRetry
   session-timeout: 40000
+  connection-timeout: 15000
+
+# Zipkin 配置
+zipkin:
+  url: http://localhost:9411/api/v2/spans
+
+# 心跳配置
+heartbeat:
+  server:
+    reader-idle-time: 10
+    writer-idle-time: 20
 
 # 服务端配置
 server:
@@ -107,7 +123,7 @@ server:
 
 # 序列化配置
 serializer:
-  type: json  # json 或 object
+  type: json  # json / object / protostuff
 
 # 限流配置
 fault-tolerance:
@@ -124,6 +140,19 @@ fault-tolerance:
 zookeeper:
   host: 172.31.151.142
   port: 2181
+  root-path: RPC
+  retry-path: CanRetry
+  session-timeout: 40000
+  connection-timeout: 15000
+
+# Zipkin 配置
+zipkin:
+  url: http://localhost:9411/api/v2/spans
+
+# 心跳配置
+heartbeat:
+  client:
+    writer-idle-time: 5
 
 # 客户端配置
 client:
@@ -131,7 +160,7 @@ client:
 
 # 序列化配置
 serializer:
-  type: json
+  type: json  # json / object / protostuff
 
 # 重试配置
 fault-tolerance:
@@ -148,8 +177,6 @@ fault-tolerance:
     half-open-success-rate: 0.4
     rest-time-period: 3000
 ```
-
-详细配置说明请查看 [QUICK_START.md](QUICK_START.md)
 
 ## 🎯 核心流程
 
@@ -241,7 +268,14 @@ YourResult result = proxy.yourMethod(param);
 
 ## 📝 更新日志
 
-### v1.1 (当前版本)
+### v1.2 (当前版本)
+- ✨ 新增链路追踪（TraceContext/TraceId）与 Zipkin 上报
+- ✨ 新增客户端/服务端心跳检测与空闲处理
+- ✨ 新增 Protostuff 序列化
+- 🔧 优化 Netty 处理链路与编码解码流程
+- 📖 更新配置示例与说明
+
+### v1.1
 - ✨ 支持 YAML 配置文件
 - ✨ 新增配置验证工具
 - ✨ 支持动态配置负载均衡策略
@@ -270,9 +304,4 @@ YourResult result = proxy.yourMethod(param);
 
 ## 🔗 相关链接
 
-- [快速开始指南](QUICK_START.md)
 - [GitHub 仓库](https://github.com/kouxh02/J-RPC)
-
----
-
-⭐ 如果这个项目对你有帮助，欢迎 Star！

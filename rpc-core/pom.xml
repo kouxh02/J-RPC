@@ -19,6 +19,31 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.zipkin.zipkin2</groupId>
+            <artifactId>zipkin</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-sender-okhttp3</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <version>1.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <version>1.7.4</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.rholder</groupId>
             <artifactId>guava-retrying</artifactId>
             <version>2.0.0</version>
