@@ -37,7 +37,6 @@ public class ServiceCache {
 
     public List<String> getServiceFromCache(String serviceName) {
         if (!cache.containsKey(serviceName)) {
-//            log.error("Cache {} not found", serviceName);
             return null;
         }
         return cache.get(serviceName);
@@ -45,12 +44,10 @@ public class ServiceCache {
 
     public void delete(String serviceName, String address) {
         if (!cache.containsKey(serviceName)) {
-//            log.error("{} not found", serviceName);
             return;
         }
         List<String> strings = cache.get(serviceName);
         strings.remove(address);
-//        log.info("name: {}, address: {}. removed from cache", serviceName, address);
     }
 
 }

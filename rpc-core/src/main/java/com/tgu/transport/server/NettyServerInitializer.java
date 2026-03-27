@@ -38,6 +38,9 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
         int readerIdleTime = RpcConfig.getServerReaderIdleTime();
         int writerIdleTime = RpcConfig.getServerWriterIdleTime();
 
+
+        // 出站处理器顺序：编码器 -> 心跳检测 -> 业务处理器
+        // 入站处理器顺序：心跳检测 -> 解码器 -> 业务处理器
         pipeline.addLast(new CustomDecoder());
         pipeline.addLast(new CustomEncoder(serializer));
 

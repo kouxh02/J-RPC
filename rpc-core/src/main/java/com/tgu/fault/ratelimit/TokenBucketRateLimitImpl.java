@@ -40,7 +40,7 @@ public class TokenBucketRateLimitImpl implements RateLimit {
     }
 
     /**
-     * 内部方法：根据时间差补充令牌
+     * 根据时间差补充令牌
      */
     private void refill() {
         long now = System.currentTimeMillis();

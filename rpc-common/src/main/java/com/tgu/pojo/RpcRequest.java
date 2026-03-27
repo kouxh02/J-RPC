@@ -4,6 +4,7 @@ import com.tgu.enums.RequestType;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -14,7 +15,7 @@ public class RpcRequest implements Serializable {
 
     // 请求ID，用于匹配请求和响应
     @Builder.Default
-    private String requestId = java.util.UUID.randomUUID().toString();
+    private String requestId = UUID.randomUUID().toString();
 
     // 服务类名，客户端只知道接口，在服务端接口指向实现类
     private String interfaceName;

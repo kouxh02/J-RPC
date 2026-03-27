@@ -52,7 +52,7 @@ public class ClientProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        log.info("ClientProxy invoke 方法被调用: {}.{}", method.getDeclaringClass().getName(), method.getName());
+//        log.info("ClientProxy invoke 方法被调用: {}.{}", method.getDeclaringClass().getName(), method.getName());
         ClientTraceInterceptor.beforeInvoke();
         // 过滤 Object 类的方法，不作为 RPC 调用
         if (method.getDeclaringClass() == Object.class) {

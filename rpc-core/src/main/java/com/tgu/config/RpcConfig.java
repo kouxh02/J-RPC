@@ -23,7 +23,6 @@ public class RpcConfig {
             config = Map.of();
         } else {
             config = yaml.load(inputStream);
-            log.info("成功加载配置文件: application.yml");
         }
     }
 

@@ -10,13 +10,13 @@ zookeeper:
   connection-timeout: 15000
 
 zipkin:
-  url: http://localhost:9411/api/v2/spans
+  url: http://172.31.151.142:9411/api/v2/spans
 
 # 心跳配置
 heartbeat:
   client:
     # 写空闲超时时间（秒）- 超过此时间没有写数据，发送心跳包
-    writer-idle-time: 5
+    writer-idle-time: 500
 
 
 # 客户端配置

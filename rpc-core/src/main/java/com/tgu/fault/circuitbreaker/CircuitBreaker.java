@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CircuitBreaker {
     // 当前状态
     private CircuitBreakerState state = CircuitBreakerState.CLOSED; // 熔断器初始状态
-    private AtomicInteger failureCount = new AtomicInteger(0); // 失败请求计数
-    private AtomicInteger successCount = new AtomicInteger(0); // 成功请求计数
-    private AtomicInteger requestCount = new AtomicInteger(0); // 请求总数
+    private final AtomicInteger failureCount = new AtomicInteger(0); // 失败请求计数
+    private final AtomicInteger successCount = new AtomicInteger(0); // 成功请求计数
+    private final AtomicInteger requestCount = new AtomicInteger(0); // 请求总数
 
     private final int failureThreshold; // 失败阈值
     private final double halfOpenSuccessRate; // 半开状态下的成功率阈值
@@ -29,7 +29,7 @@ public class CircuitBreaker {
             case OPEN -> {
                 if (currentTime - lastFailureTime > restTimePeriod) {
                     state = CircuitBreakerState.HALF_OPEN;
-                    log.info("🔄 熔断器进入半开状态 - 开始试探性恢复");
+                    log.info("熔断器进入半开状态 - 开始试探性恢复");
                     resetCounts();
                     requestCount.incrementAndGet(); // 第一个进入HALF_OPEN的请求也要计数
                     return true;
@@ -61,13 +61,11 @@ public class CircuitBreaker {
                         ? (finalSuccessCount * 100.0 / finalRequestCount)
                         : 0;
 
-                log.info("✅ 熔断器关闭 - 已恢复正常，成功率: {}/{} = {}%",
+                log.info("熔断器关闭 - 已恢复正常，成功率: {}/{} = {}%",
                         finalSuccessCount, finalRequestCount, String.format("%.1f", successRate));
                 resetCounts();
             }
         }
-        // 注意：CLOSED状态下的成功不应该重置计数
-        // 否则失败计数永远累积不到阈值
     }
 
     public synchronized void recordFailure() {

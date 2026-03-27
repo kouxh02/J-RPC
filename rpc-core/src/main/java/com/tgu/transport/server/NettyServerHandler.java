@@ -6,6 +6,7 @@ import com.tgu.pojo.RpcResponse;
 import com.tgu.provider.ServiceProvider;
 import com.tgu.fault.ratelimit.RateLimit;
 import com.tgu.trace.ServerTraceInterceptor;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.AllArgsConstructor;
@@ -41,11 +42,18 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> 
             ServerTraceInterceptor.beforeHandle();
             log.info("开始处理客户端请求: requestId={}", rpcRequest.getRequestId());
             RpcResponse response = getResponse(rpcRequest);
-            // 设置 requestId 用于客户端匹配
             response.setRequestId(rpcRequest.getRequestId());
-            ServerTraceInterceptor.afterHandle(rpcRequest.getMethodName());
-            ctx.writeAndFlush(response);
-            log.info("请求处理完成: requestId={}", rpcRequest.getRequestId());
+            ctx.writeAndFlush(response).addListener((ChannelFutureListener) future -> {
+                try {
+                    if (future.isSuccess()) {
+                        log.info("服务端返回响应: requestId={}, code={}", rpcRequest.getRequestId(), response.getCode());
+                    } else {
+                        log.error("服务端返回响应失败: requestId={}", rpcRequest.getRequestId(), future.cause());
+                    }
+                } finally {
+                    ServerTraceInterceptor.afterHandle(rpcRequest.getMethodName());
+                }
+            });
         }
     }
 

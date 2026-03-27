@@ -12,9 +12,8 @@ public class RateLimitProvider {
     public RateLimit getRatelimit(String interfaceName) {
         // 使用 computeIfAbsent 确保线程安全，避免多个线程创建多个实例
         return rateLimitMap.computeIfAbsent(interfaceName,
-                key -> new TokenBucketRateLimitImpl(
-                        RpcConfig.getRateLimitRate(), 
-                        RpcConfig.getRateLimitCapacity()));
+                key -> new TokenBucketRateLimitImpl(RpcConfig.getRateLimitRate(), RpcConfig.getRateLimitCapacity())
+        );
     }
 
 }

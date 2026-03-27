@@ -12,8 +12,7 @@ public class ClientHeartBeatHandler extends ChannelDuplexHandler {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof IdleStateEvent) {
-            IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
+        if (evt instanceof IdleStateEvent idleStateEvent) {
             IdleState idleState = idleStateEvent.state();
             if (idleState == IdleState.WRITER_IDLE) {
                 log.info("客户端发送心跳包 >>> {}", ctx.channel().id());

@@ -37,9 +37,12 @@ public class GuavaRetry {
                                     attempt.getAttemptNumber(),
                                     attempt.getExceptionCause().getMessage());
                         } else if (attempt.hasResult()) {
-                            log.error("RetryListener >>> 第 {} 次调用失败 - 返回码: {}",
-                                    attempt.getAttemptNumber(),
-                                    ((RpcResponse) attempt.getResult()).getCode());
+                            RpcResponse response = (RpcResponse) attempt.getResult();
+                            if (response != null && response.getCode() == 500) {
+                                log.warn("RetryListener >>> 第 {} 次调用失败 - 返回码: {}",
+                                        attempt.getAttemptNumber(),
+                                        response.getCode());
+                            }
                         }
                     }
                 })

@@ -27,11 +27,10 @@ public class TestConsumer {
                 } else {
                     log.error("❌ 请求失败: user == null");
                 }
-
                 log.info("----------------------------------------");
-                Integer userId = proxy.insertUserId(u);
-                log.info("✅ 插入用户ID成功: {}", userId);
-                log.info("----------------------------------------");
+//                Integer userId = proxy.insertUserId(u);
+//                log.info("✅ 插入用户ID成功: {}", userId);
+//                log.info("----------------------------------------");
             });
         }
 //        executor.shutdown();

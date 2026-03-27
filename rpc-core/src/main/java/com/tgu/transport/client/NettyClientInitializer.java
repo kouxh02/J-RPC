@@ -37,6 +37,8 @@ public class NettyClientInitializer extends ChannelInitializer<SocketChannel> {
         // 心跳机制：必须在业务Handler之前，以便正确监控空闲状态
         int writerIdleTime = RpcConfig.getClientWriterIdleTime();
 //        log.debug("客户端心跳配置: writerIdleTime={}s", writerIdleTime);
+
+        // 0表示不监控读空闲，writerIdleTime表示写空闲时间，0表示不监控读写空闲
         pipeline.addLast(new IdleStateHandler(0, writerIdleTime, 0, TimeUnit.SECONDS));
         pipeline.addLast(new ClientHeartBeatHandler());
 

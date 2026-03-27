@@ -67,6 +67,7 @@ public class NettyZKRpcClient implements RpcClient {
 
             // 设置 TraceContext
             channel.attr(MDCChannelHandler.TRACE_CONTEXT_KEY).set(mdcContextMap);
+            log.info("设置 TraceContext 到 Channel: {}", mdcContextMap);
 
             // 注册请求，获取 Future
             CompletableFuture<RpcResponse> future = UnprocessedRequests.put(rpcRequest.getRequestId());

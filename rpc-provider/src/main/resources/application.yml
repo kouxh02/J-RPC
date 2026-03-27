@@ -15,15 +15,15 @@ server:
   port: 9999
 
 zipkin:
-  url: http://localhost:9411/api/v2/spans
+  url: http://172.31.151.142:9411/api/v2/spans
 
 # 心跳配置
 heartbeat:
   server:
     # 读空闲超时时间（秒）- 超过此时间没有收到客户端心跳，触发读空闲事件
-    reader-idle-time: 10
+    reader-idle-time: 1000
     # 写空闲超时时间（秒）- 超过此时间没有写数据，触发写空闲事件
-    writer-idle-time: 20
+    writer-idle-time: 2000
 
 
 # 序列化配置

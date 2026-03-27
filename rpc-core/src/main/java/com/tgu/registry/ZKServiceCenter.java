@@ -34,7 +34,6 @@ public class ZKServiceCenter implements ServiceCenter {
                 .namespace(RpcConfig.getZkRootPath())
                 .build();
         this.client.start();
-        log.info("zookeeper 链接成功 - {}", RpcConfig.getZkConnectString());
 
         this.cache = new ServiceCache();
         WatchZK watchZK = new WatchZK(client, cache);
@@ -50,7 +49,6 @@ public class ZKServiceCenter implements ServiceCenter {
                 yield new RoundLoadBalance();
             }
         };
-//        log.info("负载均衡策略: {}", strategy);
     }
 
     // 根据服务名（接口名）返回地址
