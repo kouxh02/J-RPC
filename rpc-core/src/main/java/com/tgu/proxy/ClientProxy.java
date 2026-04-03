@@ -1,10 +1,10 @@
 package com.tgu.proxy;
 
+import com.tgu.config.RpcConfig;
 import com.tgu.enums.RequestType;
 import com.tgu.fault.circuitbreaker.CircuitBreaker;
 import com.tgu.fault.circuitbreaker.CircuitBreakerProvider;
 import com.tgu.trace.ClientTraceInterceptor;
-import com.tgu.trace.TraceContext;
 import com.tgu.transport.client.NettyZKRpcClient;
 import com.tgu.fault.retry.GuavaRetry;
 import com.tgu.transport.client.RpcClient;
@@ -54,42 +54,49 @@ public class ClientProxy implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 //        log.info("ClientProxy invoke 方法被调用: {}.{}", method.getDeclaringClass().getName(), method.getName());
         ClientTraceInterceptor.beforeInvoke();
-        // 过滤 Object 类的方法，不作为 RPC 调用
-        if (method.getDeclaringClass() == Object.class) {
-            log.info("过滤：{}", method.getName());
-            return method.invoke(this, args);
-        }
+        try {
+            // 过滤 Object 类的方法，不作为 RPC 调用
+            if (method.getDeclaringClass() == Object.class) {
+                log.info("过滤：{}", method.getName());
+                return method.invoke(this, args);
+            }
 
-        RpcRequest request = RpcRequest.builder()
-                .interfaceName(method.getDeclaringClass().getName())
-                .methodName(method.getName())
-                .params(args)
-                .type(RequestType.NORMAL)
-                .paramsType(method.getParameterTypes())
-                .build();
+            RpcRequest request = RpcRequest.builder()
+                    .interfaceName(method.getDeclaringClass().getName())
+                    .methodName(method.getName())
+                    .params(args)
+                    .type(RequestType.NORMAL)
+                    .paramsType(method.getParameterTypes())
+                    .build();
 
-        CircuitBreaker circuitBreaker = circuitBreakerProvider.getCircuitBreaker(request.getInterfaceName());
-        if (!circuitBreaker.allowRequest()) {
-            log.warn("熔断器生效，请求被过滤");
-            return null;
-        }
-        RpcResponse response;
+            CircuitBreaker circuitBreaker = null;
+            if (RpcConfig.isCircuitBreakerEnabled()) {
+                circuitBreaker = circuitBreakerProvider.getCircuitBreaker(request.getInterfaceName());
+                if (!circuitBreaker.allowRequest()) {
+                    log.warn("熔断器生效，请求被过滤");
+                    return null;
+                }
+            }
 
-        if (serviceCenter.checkRetry(request.getInterfaceName())) {
-            response = new GuavaRetry().sendServiceWithRetry(request, rpcClient);
-        } else {
-            response = rpcClient.sendRequest(request);
-        }
+            RpcResponse response;
+            boolean canRetry = RpcConfig.isRetryEnabled() && serviceCenter.checkRetry(request.getInterfaceName());
+            if (canRetry) {
+                response = new GuavaRetry().sendServiceWithRetry(request, rpcClient);
+            } else {
+                response = rpcClient.sendRequest(request);
+            }
 
-        if (response.getCode() == 200) {
-            circuitBreaker.recordSuccess();
+            if (circuitBreaker != null) {
+                if (response.isSuccess()) {
+                    circuitBreaker.recordSuccess();
+                } else if (response.isTimeout() || response.getCode() == 500) {
+                    circuitBreaker.recordFailure();
+                }
+            }
+            return response.getData();
+        } finally {
+            ClientTraceInterceptor.afterInvoke(method.getName());
         }
-        if (response.getCode() == 500) {
-            circuitBreaker.recordFailure();
-        }
-
-        ClientTraceInterceptor.afterInvoke(method.getName());
-        return response.getData();
     }
 
     public void close() {

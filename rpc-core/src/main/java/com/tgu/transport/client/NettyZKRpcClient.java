@@ -1,5 +1,6 @@
 package com.tgu.transport.client;
 
+import com.tgu.config.RpcConfig;
 import com.tgu.pojo.RpcRequest;
 import com.tgu.pojo.RpcResponse;
 import com.tgu.registry.interfaces.ServiceCenter;
@@ -26,9 +27,6 @@ public class NettyZKRpcClient implements RpcClient {
 
     private static final EventLoopGroup eventLoopGroup;
     private static final Bootstrap bootstrap;
-
-    // 请求超时时间（秒）
-    private static final int REQUEST_TIMEOUT = 10;
 
     private ServiceCenter serviceCenter;
 
@@ -84,15 +82,18 @@ public class NettyZKRpcClient implements RpcClient {
             });
 
             // 等待响应（带超时）
-            RpcResponse response = future.get(REQUEST_TIMEOUT, TimeUnit.SECONDS);
+            RpcResponse response = future.get(RpcConfig.getClientRequestTimeout(), TimeUnit.MILLISECONDS);
             log.info("收到响应: requestId={}, response={}", rpcRequest.getRequestId(), response);
             return response;
 
         } catch (TimeoutException e) {
             log.error("请求超时: requestId={}", rpcRequest.getRequestId());
             UnprocessedRequests.remove(rpcRequest.getRequestId());
-            return RpcResponse.fail();
+            return RpcResponse.timeout();
         } catch (InterruptedException | ExecutionException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             log.error("请求异常: {}", e.getMessage());
             return RpcResponse.fail();
         }

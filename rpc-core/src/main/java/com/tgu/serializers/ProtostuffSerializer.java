@@ -48,6 +48,11 @@ public class ProtostuffSerializer implements Serializer {
         return 2;
     }
 
+    @Override
+    public String getName() {
+        return "protostuff";
+    }
+
     private Class<?> getClass4MessageType(int messageType) {
         switch (messageType) {
             case 0 -> {

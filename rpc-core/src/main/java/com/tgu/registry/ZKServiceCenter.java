@@ -2,11 +2,9 @@ package com.tgu.registry;
 
 import com.tgu.config.RpcConfig;
 import com.tgu.loadbalance.LoadBalance;
+import com.tgu.registry.interfaces.ServiceCenter;
 import com.tgu.registry.cache.ServiceCache;
 import com.tgu.registry.cache.WatchZK;
-import com.tgu.loadbalance.RoundLoadBalance;
-import com.tgu.loadbalance.RandomLoadBalance;
-import com.tgu.registry.interfaces.ServiceCenter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -41,14 +39,11 @@ public class ZKServiceCenter implements ServiceCenter {
         
         // 根据配置选择负载均衡策略
         String strategy = RpcConfig.getLoadBalanceStrategy();
-        this.loadBalance = switch (strategy.toLowerCase()) {
-            case "random" -> new RandomLoadBalance();
-            case "round" -> new RoundLoadBalance();
-            default -> {
-                log.warn("未知的负载均衡策略: {}, 使用默认策略: round", strategy);
-                yield new RoundLoadBalance();
-            }
-        };
+        this.loadBalance = LoadBalance.getLoadBalance(strategy);
+        if (this.loadBalance == null) {
+            log.warn("未知的负载均衡策略: {}, 使用默认策略: round", strategy);
+            this.loadBalance = LoadBalance.getLoadBalance("round");
+        }
     }
 
     // 根据服务名（接口名）返回地址

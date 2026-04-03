@@ -1,0 +1,3 @@
+com.tgu.serializers.ObjectSerializer
+com.tgu.serializers.JsonSerializer
+com.tgu.serializers.ProtostuffSerializer

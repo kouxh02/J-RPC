@@ -1,5 +1,7 @@
 package com.tgu.config;
 
+import com.tgu.loadbalance.LoadBalance;
+import com.tgu.serializers.Serializer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -27,6 +29,21 @@ public class ConfigValidator {
             // 验证服务端配置
             if (RpcConfig.getServerPort() <= 0 || RpcConfig.getServerPort() > 65535) {
                 log.error("服务端口配置无效: {}", RpcConfig.getServerPort());
+                return false;
+            }
+
+            if (RpcConfig.getClientRequestTimeout() <= 0) {
+                log.error("客户端请求超时配置无效: {}", RpcConfig.getClientRequestTimeout());
+                return false;
+            }
+
+            if (Serializer.getSerializerByName(RpcConfig.getSerializerType()) == null) {
+                log.error("未找到对应的序列化器: {}", RpcConfig.getSerializerType());
+                return false;
+            }
+
+            if (LoadBalance.getLoadBalance(RpcConfig.getLoadBalanceStrategy()) == null) {
+                log.error("未找到对应的负载均衡策略: {}", RpcConfig.getLoadBalanceStrategy());
                 return false;
             }
             

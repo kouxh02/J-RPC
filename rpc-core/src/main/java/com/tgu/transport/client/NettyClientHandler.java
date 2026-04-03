@@ -11,7 +11,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<RpcResponse>
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
         // 心跳响应不需要处理
-        if (response.getCode() == 200 && response.getMessage() != null
+        if (response.isSuccess() && response.getMessage() != null
                 && response.getMessage().contains("heartbeat")) {
             TraceContext.clear();
             log.info("收到心跳响应: {}, response: {}", ctx.channel().id(), response);

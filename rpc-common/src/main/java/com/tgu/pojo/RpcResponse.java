@@ -1,5 +1,6 @@
 package com.tgu.pojo;
 
+import com.tgu.enums.ResponseCode;
 import lombok.*;
 
 import java.io.Serializable;
@@ -27,14 +28,32 @@ public class RpcResponse implements Serializable {
     // 构造成功信息
     public static RpcResponse sussess(Object data) {
         return RpcResponse.builder()
-                .code(200)
+                .code(ResponseCode.SUCCESS.getCode())
                 .data(data)
-                .dataType(data.getClass())
+                .dataType(data == null ? null : data.getClass())
                 .build();
     }
 
     // 构造失败信息
     public static RpcResponse fail() {
-        return RpcResponse.builder().code(500).message("服务器发生错误").build();
+        return RpcResponse.builder()
+                .code(ResponseCode.FAIL.getCode())
+                .message("服务器发生错误")
+                .build();
+    }
+
+    public static RpcResponse timeout() {
+        return RpcResponse.builder()
+                .code(ResponseCode.TIMEOUT.getCode())
+                .message("请求超时")
+                .build();
+    }
+
+    public boolean isSuccess() {
+        return code == ResponseCode.SUCCESS.getCode();
+    }
+
+    public boolean isTimeout() {
+        return code == ResponseCode.TIMEOUT.getCode();
     }
 }

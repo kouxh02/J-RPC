@@ -23,6 +23,8 @@ heartbeat:
 client:
   # 负载均衡策略: round(轮询), random(随机)
   load-balance: round
+  # 请求超时时间（毫秒）
+  request-timeout: 10000
 
 # 序列化配置
 serializer:

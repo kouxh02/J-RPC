@@ -11,4 +11,9 @@ public class RandomLoadBalance implements LoadBalance{
         int choose = random.nextInt(addressList.size());
         return addressList.get(choose);
     }
+
+    @Override
+    public String getName() {
+        return "random";
+    }
 }

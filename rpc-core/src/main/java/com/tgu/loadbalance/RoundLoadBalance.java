@@ -3,7 +3,6 @@ package com.tgu.loadbalance;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -25,5 +24,10 @@ public class RoundLoadBalance implements LoadBalance{
         String selectedServer = addressList.get(index);
 //        log.info("负载均衡选择了服务器: {}, 索引: {}", selectedServer, index);
         return selectedServer;
+    }
+
+    @Override
+    public String getName() {
+        return "round";
     }
 }

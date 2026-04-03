@@ -31,7 +31,10 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
         // pipeline.addLast(new LengthFieldPrepender(4));
 
         // 根据配置获取序列化器
-        Serializer serializer = Serializer.getSerializerByCode(RpcConfig.getSerializerCode());
+        Serializer serializer = Serializer.getSerializerByName(RpcConfig.getSerializerType());
+        if (serializer == null) {
+            throw new IllegalStateException("未找到对应的序列化器: " + RpcConfig.getSerializerType());
+        }
 //        log.info("服务端使用序列化器: {}", RpcConfig.getSerializerType());
 
         // 读空闲/写空闲超时处理

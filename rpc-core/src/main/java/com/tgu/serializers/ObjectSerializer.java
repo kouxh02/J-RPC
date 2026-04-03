@@ -59,4 +59,9 @@ public class ObjectSerializer implements Serializer{
     public int getType() {
         return 0;
     }
+
+    @Override
+    public String getName() {
+        return "object";
+    }
 }

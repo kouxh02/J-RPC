@@ -78,20 +78,14 @@ public class RpcConfig {
         return getConfigValue("client.load-balance", "round");
     }
 
+    public static int getClientRequestTimeout() {
+        return getConfigValue("client.request-timeout", 10000);
+    }
+
     // ==================== 序列化配置 ====================
 
     public static String getSerializerType() {
         return getConfigValue("serializer.type", "json");
-    }
-
-    public static int getSerializerCode() {
-        String type = getSerializerType();
-        return switch (type.toLowerCase()) {
-            case "object" -> 0;
-            case "json" -> 1;
-            case "protostuff" -> 2;
-            default -> 1;
-        };
     }
 
     // ==================== 心跳配置 ====================

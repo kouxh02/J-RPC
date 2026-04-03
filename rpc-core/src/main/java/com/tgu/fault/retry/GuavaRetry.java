@@ -2,14 +2,13 @@ package com.tgu.fault.retry;
 
 import com.github.rholder.retry.*;
 import com.tgu.config.RpcConfig;
-import com.tgu.transport.client.RpcClient;
 import com.tgu.pojo.RpcRequest;
 import com.tgu.pojo.RpcResponse;
+import com.tgu.transport.client.RpcClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class GuavaRetry {
@@ -20,8 +19,9 @@ public class GuavaRetry {
         this.rpcClient = rpcClient;
         Retryer<RpcResponse> retryer = RetryerBuilder.<RpcResponse>newBuilder()
                 .retryIfException()
-                // 重试会在请求发生异常或返回状态码为500时进行
-                .retryIfResult(response -> Objects.equals(response.getCode(), 500))
+                // 重试会在请求发生异常、超时或返回状态码为500时进行
+                .retryIfResult(response -> response != null &&
+                        (response.isTimeout() || Objects.equals(response.getCode(), 500)))
                 // 每次重试之间固定等待时间（从配置读取）
                 .withWaitStrategy(WaitStrategies.fixedWait(
                         RpcConfig.getRetryWaitTime(), 
@@ -38,10 +38,11 @@ public class GuavaRetry {
                                     attempt.getExceptionCause().getMessage());
                         } else if (attempt.hasResult()) {
                             RpcResponse response = (RpcResponse) attempt.getResult();
-                            if (response != null && response.getCode() == 500) {
-                                log.warn("RetryListener >>> 第 {} 次调用失败 - 返回码: {}",
+                            if (response != null && (response.isTimeout() || response.getCode() == 500)) {
+                                log.warn("RetryListener >>> 第 {} 次调用失败 - 返回码: {}, message: {}",
                                         attempt.getAttemptNumber(),
-                                        response.getCode());
+                                        response.getCode(),
+                                        response.getMessage());
                             }
                         }
                     }
@@ -50,6 +51,15 @@ public class GuavaRetry {
         try {
             return retryer.call(() -> rpcClient.sendRequest(request));
         } catch (ExecutionException | RetryException e) {
+            if (e instanceof RetryException retryException) {
+                Attempt<?> lastAttempt = retryException.getLastFailedAttempt();
+                if (lastAttempt != null && lastAttempt.hasResult()) {
+                    RpcResponse response = (RpcResponse) lastAttempt.getResult();
+                    if (response != null) {
+                        return response;
+                    }
+                }
+            }
             log.error("重试机制最终失败 - 接口: {}, 方法: {}, 异常: {}",
                     request.getInterfaceName(),
                     request.getMethodName(),
