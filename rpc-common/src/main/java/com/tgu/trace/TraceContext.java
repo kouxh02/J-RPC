@@ -3,14 +3,12 @@ package com.tgu.trace;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
-import java.util.Map;
-
 
 @Slf4j
 public class TraceContext {
 
     public static void setTraceId(String traceId) {
-        MDC.put("traceId", traceId);
+        putOrRemove("traceId", traceId);
     }
 
     public static String getTraceId() {
@@ -18,7 +16,7 @@ public class TraceContext {
     }
 
     public static void setSpanId(String spanId) {
-        MDC.put("spanId", spanId);
+        putOrRemove("spanId", spanId);
     }
 
     public static String getSpanId() {
@@ -26,7 +24,7 @@ public class TraceContext {
     }
 
     public static void setParentSpanId(String parentSpanId) {
-        MDC.put("parentSpanId", parentSpanId);
+        putOrRemove("parentSpanId", parentSpanId);
     }
 
     public static String getParentSpanId() {
@@ -34,24 +32,22 @@ public class TraceContext {
     }
 
     public static void setStartTimestamp(String startTimestamp) {
-        MDC.put("startTimestamp", startTimestamp);
+        putOrRemove("startTimestamp", startTimestamp);
     }
 
     public static String getStartTimestamp() {
         return MDC.get("startTimestamp");
     }
 
-    public static Map<String, String> getCopy() {
-        return MDC.getCopyOfContextMap();
-    }
-
-    public static void clone(Map<String, String> context) {
-        for (Map.Entry<String, String> entry : context.entrySet()) {
-            MDC.put(entry.getKey(), entry.getValue());
-        }
-    }
-
     public static void clear() {
         MDC.clear();
+    }
+
+    private static void putOrRemove(String key, String value) {
+        if (value == null || value.isEmpty()) {
+            MDC.remove(key);
+            return;
+        }
+        MDC.put(key, value);
     }
 }

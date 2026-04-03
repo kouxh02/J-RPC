@@ -32,6 +32,14 @@ public class RpcConfig {
         return getConfigValue("zipkin.url", "http://172.31.151.142:9411/api/v2/spans");
     }
 
+    public static boolean isTracingEnabled() {
+        return getConfigValue("tracing.enabled", true);
+    }
+
+    public static String getTracingServiceName() {
+        return getConfigValue("tracing.service-name", "j-rpc");
+    }
+
     // ==================== ZooKeeper配置 ====================
 
     public static String getZkHost() {

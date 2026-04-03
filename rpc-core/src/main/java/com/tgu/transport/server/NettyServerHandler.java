@@ -39,6 +39,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> 
             return;
         }
         if (rpcRequest.getType() == RequestType.NORMAL) {
+            String spanName = buildSpanName(rpcRequest.getInterfaceName(), rpcRequest.getMethodName());
             ServerTraceInterceptor.beforeHandle();
             log.info("开始处理客户端请求: requestId={}", rpcRequest.getRequestId());
             RpcResponse response = getResponse(rpcRequest);
@@ -51,10 +52,16 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> 
                         log.error("服务端返回响应失败: requestId={}", rpcRequest.getRequestId(), future.cause());
                     }
                 } finally {
-                    ServerTraceInterceptor.afterHandle(rpcRequest.getMethodName());
+                    ServerTraceInterceptor.afterHandle(spanName);
                 }
             });
         }
+    }
+
+    private String buildSpanName(String interfaceName, String methodName) {
+        int index = interfaceName.lastIndexOf('.');
+        String serviceName = index >= 0 ? interfaceName.substring(index + 1) : interfaceName;
+        return serviceName + "#" + methodName;
     }
 
     private RpcResponse getResponse(RpcRequest request) {

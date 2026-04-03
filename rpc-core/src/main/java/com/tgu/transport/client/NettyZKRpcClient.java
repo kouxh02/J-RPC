@@ -5,7 +5,6 @@ import com.tgu.pojo.RpcRequest;
 import com.tgu.pojo.RpcResponse;
 import com.tgu.registry.interfaces.ServiceCenter;
 import com.tgu.registry.ZKServiceCenter;
-import com.tgu.trace.TraceContext;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -16,7 +15,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +46,6 @@ public class NettyZKRpcClient implements RpcClient {
 
     @Override
     public RpcResponse sendRequest(RpcRequest rpcRequest) {
-        Map<String, String> mdcContextMap = TraceContext.getCopy();
         try {
             InetSocketAddress address = serviceCenter.serviceDiscovery(rpcRequest.getInterfaceName());
             if (address == null) {
@@ -62,10 +59,6 @@ public class NettyZKRpcClient implements RpcClient {
                 log.error("获取 Channel 失败");
                 return RpcResponse.fail();
             }
-
-            // 设置 TraceContext
-            channel.attr(MDCChannelHandler.TRACE_CONTEXT_KEY).set(mdcContextMap);
-            log.info("设置 TraceContext 到 Channel: {}", mdcContextMap);
 
             // 注册请求，获取 Future
             CompletableFuture<RpcResponse> future = UnprocessedRequests.put(rpcRequest.getRequestId());

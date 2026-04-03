@@ -29,6 +29,11 @@ public class RpcRequest implements Serializable {
     // 参数类型
     private Class<?>[] paramsType;
 
+    // 链路追踪信息
+    private String traceId;
+
+    private String spanId;
+
     // 请求类型
     @Builder.Default
     private RequestType type = RequestType.NORMAL;

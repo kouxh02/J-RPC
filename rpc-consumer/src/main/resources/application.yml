@@ -12,6 +12,10 @@ zookeeper:
 zipkin:
   url: http://172.31.151.142:9411/api/v2/spans
 
+tracing:
+  enabled: true
+  service-name: j-rpc-consumer
+
 # 心跳配置
 heartbeat:
   client:

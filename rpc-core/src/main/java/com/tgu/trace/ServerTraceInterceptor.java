@@ -19,7 +19,7 @@ public class ServerTraceInterceptor {
         TraceContext.setStartTimestamp(String.valueOf(startTimestamp));
     }
 
-    public static void afterHandle(String serviceName) {
+    public static void afterHandle(String spanName) {
         String traceId = TraceContext.getTraceId();
         String spanId = TraceContext.getSpanId();
         String startTimestampValue = TraceContext.getStartTimestamp();
@@ -36,10 +36,9 @@ public class ServerTraceInterceptor {
                 traceId,
                 spanId,
                 TraceContext.getParentSpanId(),
-                "server-" + serviceName,
+                spanName,
                 startTimestamp,
                 duration,
-                serviceName,
                 "server"
         );
         TraceContext.clear();

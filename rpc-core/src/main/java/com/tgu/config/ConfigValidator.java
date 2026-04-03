@@ -46,6 +46,12 @@ public class ConfigValidator {
                 log.error("未找到对应的负载均衡策略: {}", RpcConfig.getLoadBalanceStrategy());
                 return false;
             }
+
+            if (RpcConfig.isTracingEnabled() &&
+                    (RpcConfig.getTracingServiceName() == null || RpcConfig.getTracingServiceName().isEmpty())) {
+                log.error("链路追踪服务名未配置");
+                return false;
+            }
             
             // 验证限流配置
             if (RpcConfig.getRateLimitRate() <= 0) {

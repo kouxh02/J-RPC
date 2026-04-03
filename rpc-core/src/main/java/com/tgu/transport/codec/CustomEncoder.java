@@ -5,7 +5,6 @@ import com.tgu.enums.RequestType;
 import com.tgu.pojo.RpcRequest;
 import com.tgu.pojo.RpcResponse;
 import com.tgu.serializers.Serializer;
-import com.tgu.trace.TraceContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -80,26 +79,15 @@ public class CustomEncoder extends MessageToByteEncoder<Object> {
     }
 
     private byte[] buildTraceBytes(Object msg) {
-        if (isHeartbeatMessage(msg)) {
+        if (!(msg instanceof RpcRequest request) || request.getType() != RequestType.NORMAL) {
             return new byte[0];
         }
 
-        String traceId = TraceContext.getTraceId();
-        String spanId = TraceContext.getSpanId();
+        String traceId = request.getTraceId();
+        String spanId = request.getSpanId();
         if (traceId == null || traceId.isEmpty() || spanId == null || spanId.isEmpty()) {
             return new byte[0];
         }
-
         return (traceId + ";" + spanId).getBytes(StandardCharsets.UTF_8);
-    }
-
-    private boolean isHeartbeatMessage(Object msg) {
-        if (msg instanceof RpcRequest request) {
-            return request.getType() == RequestType.HEARTBEAT;
-        }
-        if (msg instanceof RpcResponse response) {
-            return response.getMessage() != null && response.getMessage().contains("heartbeat");
-        }
-        return false;
     }
 }

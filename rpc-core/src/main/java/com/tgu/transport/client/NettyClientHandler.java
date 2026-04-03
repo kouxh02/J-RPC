@@ -1,7 +1,6 @@
 package com.tgu.transport.client;
 
 import com.tgu.pojo.RpcResponse;
-import com.tgu.trace.TraceContext;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +10,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<RpcResponse>
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
         // 心跳响应不需要处理
-        if (response.isSuccess() && response.getMessage() != null
-                && response.getMessage().contains("heartbeat")) {
-            TraceContext.clear();
+        if (response.isSuccess() && response.getMessage() != null && response.getMessage().contains("heartbeat")) {
             log.info("收到心跳响应: {}, response: {}", ctx.channel().id(), response);
             return;
         }

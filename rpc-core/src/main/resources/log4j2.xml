@@ -2,7 +2,7 @@
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-5level} [%t] %c - %msg%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %highlight{%-5level} [%t] [%X{traceId:-},%X{spanId:-}] %c - %msg%n"/>
         </Console>
     </Appenders>
     <Loggers>

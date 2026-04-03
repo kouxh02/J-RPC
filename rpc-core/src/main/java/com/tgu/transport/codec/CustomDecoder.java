@@ -69,7 +69,6 @@ public class CustomDecoder extends ByteToMessageDecoder {
                 // 5) traceBytes
                 byte[] traceBytes = new byte[traceLength];
                 in.readBytes(traceBytes);
-                applyTraceContext(traceBytes);
 
                 // 6) messageType
                 short messageType = in.readShort();
@@ -78,6 +77,7 @@ public class CustomDecoder extends ByteToMessageDecoder {
                     ctx.close();
                     return;
                 }
+                applyTraceContext(messageType, traceBytes);
 
                 // 7) serializerType
                 short serializerType = in.readShort();
@@ -130,9 +130,9 @@ public class CustomDecoder extends ByteToMessageDecoder {
         }
     }
 
-    private void applyTraceContext(byte[] traceBytes) {
+    private void applyTraceContext(short messageType, byte[] traceBytes) {
         TraceContext.clear();
-        if (traceBytes.length == 0) {
+        if (messageType != MessageType.REQUEST.getCode() || traceBytes.length == 0) {
             return;
         }
         String traceMsg = new String(traceBytes, java.nio.charset.StandardCharsets.UTF_8);

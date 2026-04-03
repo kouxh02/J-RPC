@@ -46,6 +46,5 @@ public class NettyClientInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new ClientHeartBeatHandler());
 
         pipeline.addLast(new NettyClientHandler());
-        pipeline.addLast(new MDCChannelHandler());
     }
 }

@@ -5,6 +5,7 @@ import com.tgu.enums.RequestType;
 import com.tgu.fault.circuitbreaker.CircuitBreaker;
 import com.tgu.fault.circuitbreaker.CircuitBreakerProvider;
 import com.tgu.trace.ClientTraceInterceptor;
+import com.tgu.trace.TraceContext;
 import com.tgu.transport.client.NettyZKRpcClient;
 import com.tgu.fault.retry.GuavaRetry;
 import com.tgu.transport.client.RpcClient;
@@ -53,20 +54,23 @@ public class ClientProxy implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 //        log.info("ClientProxy invoke 方法被调用: {}.{}", method.getDeclaringClass().getName(), method.getName());
+        // 过滤 Object 类的方法，不作为 RPC 调用
+        if (method.getDeclaringClass() == Object.class) {
+            log.info("过滤：{}", method.getName());
+            return method.invoke(this, args);
+        }
+
+        String spanName = buildSpanName(method.getDeclaringClass().getName(), method.getName());
         ClientTraceInterceptor.beforeInvoke();
         try {
-            // 过滤 Object 类的方法，不作为 RPC 调用
-            if (method.getDeclaringClass() == Object.class) {
-                log.info("过滤：{}", method.getName());
-                return method.invoke(this, args);
-            }
-
             RpcRequest request = RpcRequest.builder()
                     .interfaceName(method.getDeclaringClass().getName())
                     .methodName(method.getName())
                     .params(args)
                     .type(RequestType.NORMAL)
                     .paramsType(method.getParameterTypes())
+                    .traceId(TraceContext.getTraceId())
+                    .spanId(TraceContext.getSpanId())
                     .build();
 
             CircuitBreaker circuitBreaker = null;
@@ -95,8 +99,14 @@ public class ClientProxy implements InvocationHandler {
             }
             return response.getData();
         } finally {
-            ClientTraceInterceptor.afterInvoke(method.getName());
+            ClientTraceInterceptor.afterInvoke(spanName);
         }
+    }
+
+    private String buildSpanName(String interfaceName, String methodName) {
+        int index = interfaceName.lastIndexOf('.');
+        String serviceName = index >= 0 ? interfaceName.substring(index + 1) : interfaceName;
+        return serviceName + "#" + methodName;
     }
 
     public void close() {
